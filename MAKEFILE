@@ -1,0 +1,80 @@
+NAME = riot.dll
+CC = CL.EXE
+LINKER = LINK.EXE
+CFLAGS = /W3 /WX /WL /O2 /TP /MT /c\
+/D SOURCEMM_EXPORTS /D _USRDLL /D _MBCS\
+/D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE\
+/D SOURCE_ENGINE=3 /D ENGINE=orangebox
+LFLAGS = /DLL\
+/MACHINE:X86\
+/SUBSYSTEM:WINDOWS\
+/NODEFAULTLIB:LIBC;LIBCD;LIBCMTD\
+/DYNAMICBASE:NO\
+/INCREMENTAL:NO\
+/LTCG\
+/MANIFEST\
+/MANIFESTUAC:"uiAccess='false' level='asInvoker'"\
+/OPT:REF\
+/OPT:ICF\
+
+SRCS_PATH = srcs
+OBJS_PATH = objs
+INCLUDES_PATH = includes
+BUILD_PATH = build
+
+INCLUDES = $(INCLUDES_PATH)\
+$(MMSOURCE18)\core\
+$(MMSOURCE18)\core\sourcehook\
+$(HL2SDK)\public\
+$(HL2SDK)\public\dlls\
+$(HL2SDK)\public\engine\
+$(HL2SDK)\public\game\server\
+$(HL2SDK)\public\tier0\
+$(HL2SDK)\public\tier1\
+$(HL2SDK)\public\vstdlib\
+$(HL2SDKOB)\public\
+$(HL2SDKOB)\loader\
+$(HL2SDKOB)\public\dlls\
+$(HL2SDKOB)\public\engine\
+$(HL2SDKOB)\public\game\server\
+$(HL2SDKOB)\public\tier0\
+$(HL2SDKOB)\public\tier1\
+$(HL2SDKOB)\public\vstdlib\
+
+LIBS = $(HL2SDKOB)\lib\public\tier0.lib\
+$(HL2SDKOB)\lib\public\tier1.lib\
+$(HL2SDKOB)\lib\public\vstdlib.lib
+
+SRCS_FILES = \riot.x
+
+SINGLESPACE=$(subst ',,' ')
+
+OBJS = $(subst \,$(OBJS_PATH)\,$(SRCS_FILES))
+OBJS = $(subst .x,.obj,$(OBJS))
+SRCS = $(subst \,$(SRCS_PATH)\,$(SRCS_FILES))
+SRCS = $(subst .x,.cpp,$(SRCS))
+INCLUDES = $(subst $(SINGLESPACE),;,$(INCLUDES))
+LIBS = $(subst $(SINGLESPACE),;,$(LIBS))
+
+INCLUDE = $(INCLUDE);$(INCLUDES)
+LIB = $(LIB);$(LIBS)
+
+all: $(SRCS) $(OBJS_PATH) $(BUILD_PATH) $(NAME)
+
+$(OBJS_PATH):
+	MD objs
+
+$(BUILD_PATH):
+	MD build
+
+$(OBJS): $(SRCS)
+	$(CC) /Fo$(OBJS_PATH)\ $(CFLAGS) $(SRCS)
+
+$(NAME): $(OBJS)
+	$(LINKER) /OUT:$(BUILD_PATH)\$(NAME) $(LFLAGS) $(OBJS)
+
+clean:
+	!IF EXIST "$(OBJS_PATH)" RMDIR /s /q $(OBJS_PATH)
+
+fclean: clean
+	!IF EXIST "$(BUILD_PATH)" RMDIR /s /q $(BUILD_PATH)
