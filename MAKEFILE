@@ -3,12 +3,18 @@ CC = CL.EXE
 LINKER = LINK.EXE
 CFLAGS = /W3 /WX /WL /O2 /TP /MT /c\
 /D SOURCEMM_EXPORTS /D _USRDLL /D _MBCS\
-/D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE\
-/D SOURCE_ENGINE=3 /D ENGINE=orangebox
+/D _CRT_SECURE_NO_DEPRECATE /D _CRT_SECURE_NO_WARNINGS /D _CRT_NONSTDC_NO_DEPRECATE\
+/D SE_EPISODEONE=1 /D SE_DARKMESSIAH=2 /D SE_ORANGEBOX=3\
+/D SE_BLOODYGOODTIME=4 /D SE_EYE=5 /D SE_CSS=6 /D SE_ORANGEBOXVALVE=7\
+/D SE_LEFT4DEAD=8 /D SE_LEFT4DEAD2=9 /D SE_ALIENSWARM=10\
+/D SE_PORTAL2=11 /D SE_CSGO=12\
+/D SOURCE_ENGINE=1\
+/D WIN32 /D _WINDOWS
 LFLAGS = /DLL\
 /MACHINE:X86\
 /SUBSYSTEM:WINDOWS\
 /NODEFAULTLIB:LIBC;LIBCD;LIBCMTD\
+/LIBPATH:$(HL2SDK)\lib\public\
 /DYNAMICBASE:NO\
 /INCREMENTAL:NO\
 /LTCG\
@@ -32,20 +38,10 @@ $(HL2SDK)\public\game\server\
 $(HL2SDK)\public\tier0\
 $(HL2SDK)\public\tier1\
 $(HL2SDK)\public\vstdlib\
-$(HL2SDKOB)\public\
-$(HL2SDKOB)\loader\
-$(HL2SDKOB)\public\dlls\
-$(HL2SDKOB)\public\engine\
-$(HL2SDKOB)\public\game\server\
-$(HL2SDKOB)\public\tier0\
-$(HL2SDKOB)\public\tier1\
-$(HL2SDKOB)\public\vstdlib\
 
-LIBS = $(HL2SDKOB)\lib\public\tier0.lib\
-$(HL2SDKOB)\lib\public\tier1.lib\
-$(HL2SDKOB)\lib\public\vstdlib.lib
+LIBS = tier0.lib tier1.lib vstdlib.lib legacy_stdio_definitions.lib
 
-SRCS_FILES = \riot.x
+SRCS_FILES = \riot.x \day.x \zombie.x
 
 SINGLESPACE=$(subst ',,' ')
 
@@ -54,10 +50,8 @@ OBJS = $(subst .x,.obj,$(OBJS))
 SRCS = $(subst \,$(SRCS_PATH)\,$(SRCS_FILES))
 SRCS = $(subst .x,.cpp,$(SRCS))
 INCLUDES = $(subst $(SINGLESPACE),;,$(INCLUDES))
-LIBS = $(subst $(SINGLESPACE),;,$(LIBS))
 
-INCLUDE = $(INCLUDE);$(INCLUDES)
-LIB = $(LIB);$(LIBS)
+INCLUDE = $(INCLUDES);$(INCLUDE)
 
 all: $(SRCS) $(OBJS_PATH) $(BUILD_PATH) $(NAME)
 
@@ -71,10 +65,12 @@ $(OBJS): $(SRCS)
 	$(CC) /Fo$(OBJS_PATH)\ $(CFLAGS) $(SRCS)
 
 $(NAME): $(OBJS)
-	$(LINKER) /OUT:$(BUILD_PATH)\$(NAME) $(LFLAGS) $(OBJS)
+	$(LINKER) /OUT:$(BUILD_PATH)\$(NAME) $(LFLAGS) $(OBJS) $(LIBS)
 
 clean:
 	!IF EXIST "$(OBJS_PATH)" RMDIR /s /q $(OBJS_PATH)
 
 fclean: clean
 	!IF EXIST "$(BUILD_PATH)" RMDIR /s /q $(BUILD_PATH)
+
+re: fclean all

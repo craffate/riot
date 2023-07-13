@@ -8,12 +8,24 @@
 # define RIOT_LICENSE "UNLICENSED"
 # define RIOT_VERSION "0.0.0"
 # define RIOT_TAG "RIOT"
+# define RIOT_PATH "addons/riot"
+# define RIOT_CONFIG_PATH RIOT_PATH ## "/configs"
 
 # include <ISmmPlugin.h>
 # include <stdio.h>
+# include <filesystem.h>
+# include "KeyValues.h"
 
-# if defined WIN32 && !defined snprintf
-#  define snprintf _snprintf
+# ifdef WIN32
+#   include <windows.h>
+#   ifndef snprintf
+#     define snprintf _snprintf
+#   endif
+#   define strdup _strdup
+# endif
+
+# ifdef SOURCE_ENGINE
+#   include "KeyValues.h"
 # endif
 
 class Riot : public ISmmPlugin
