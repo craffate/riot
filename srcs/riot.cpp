@@ -1,11 +1,12 @@
 #include "riot.hpp"
 #include "day.hpp"
 #include "zombie.hpp"
-
-SH_DECL_HOOK3_void(IServerGameDLL, ServerActivate, SH_NOATTRIB, 0, edict_t *, int, int);
+#include "cvar.hpp"
 
 Riot			g_Riot;
 IServerGameDLL		*server = NULL;
+IBaseFileSystem		*basefilesystem = NULL;
+ICvar			*icvar = NULL;
 
 PLUGIN_EXPOSE(Riot, g_Riot);
 
@@ -65,18 +66,18 @@ static void		LoadZombies(KeyValues * const root)
 bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	bool		ret;
-	IBaseFileSystem	*basefilesystem;
 	char		days_path[MAX_PATH + 1];
 	char		zombies_path[MAX_PATH + 1];
 	KeyValues	*days_root;
 	KeyValues	*zombies_root;
 
 	ret = true;
-	basefilesystem = NULL;
 	days_root = new KeyValues("Days");
 	zombies_root = new KeyValues("Zombies");
 	PLUGIN_SAVEVARS();
+	GET_V_IFACE_CURRENT(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_CURRENT(GetFileSystemFactory, basefilesystem, IBaseFileSystem, BASEFILESYSTEM_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
 	ismm->PathFormat(days_path, (MAX_PATH + 1), "%s/%s/%s", ismm->GetBaseDir(), RIOT_CONFIG_PATH, "days.cfg");
 	ismm->PathFormat(zombies_path, (MAX_PATH + 1), "%s/%s/%s", ismm->GetBaseDir(), RIOT_CONFIG_PATH, "zombies.cfg");
 
@@ -99,7 +100,6 @@ bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool l
 		LoadZombies((KeyValues * const)zombies_root);
 		zombies_root->deleteThis();
 	}
-
 	return (ret);
 }
 

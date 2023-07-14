@@ -47,6 +47,8 @@ class Riot : public ISmmPlugin
 };
 
 extern Riot			g_Riot;
+extern IBaseFileSystem		*basefilesystem;
+extern IServerGameDLL		*server;
 
 PLUGIN_GLOBALVARS();
 
