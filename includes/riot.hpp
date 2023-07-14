@@ -13,8 +13,6 @@
 
 # include <ISmmPlugin.h>
 # include <stdio.h>
-# include <filesystem.h>
-# include "KeyValues.h"
 
 # ifdef WIN32
 #   include <windows.h>
@@ -25,7 +23,10 @@
 # endif
 
 # ifdef SOURCE_ENGINE
-#   include "KeyValues.h"
+#   include <filesystem.h>
+#   include <KeyValues.h>
+#   include <iplayerinfo.h>
+#   include <icvar.h>
 # endif
 
 class Riot : public ISmmPlugin
@@ -47,8 +48,10 @@ class Riot : public ISmmPlugin
 };
 
 extern Riot			g_Riot;
-extern IBaseFileSystem		*basefilesystem;
 extern IServerGameDLL		*server;
+extern IPlayerInfoManager	*playerinfomanager;
+extern IBaseFileSystem		*basefilesystem;
+extern ICvar			*icvar;
 
 PLUGIN_GLOBALVARS();
 

@@ -1,10 +1,10 @@
 #include "riot.hpp"
 #include "day.hpp"
 #include "zombie.hpp"
-#include "cvar.hpp"
 
 Riot			g_Riot;
 IServerGameDLL		*server = NULL;
+IPlayerInfoManager	*playerinfomanager = NULL;
 IBaseFileSystem		*basefilesystem = NULL;
 ICvar			*icvar = NULL;
 
@@ -76,6 +76,7 @@ bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool l
 	zombies_root = new KeyValues("Zombies");
 	PLUGIN_SAVEVARS();
 	GET_V_IFACE_CURRENT(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
+	GET_V_IFACE_CURRENT(GetServerFactory, playerinfomanager, IPlayerInfoManager, INTERFACEVERSION_PLAYERINFOMANAGER);
 	GET_V_IFACE_CURRENT(GetFileSystemFactory, basefilesystem, IBaseFileSystem, BASEFILESYSTEM_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
 	ismm->PathFormat(days_path, (MAX_PATH + 1), "%s/%s/%s", ismm->GetBaseDir(), RIOT_CONFIG_PATH, "days.cfg");
