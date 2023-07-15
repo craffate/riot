@@ -1,14 +1,22 @@
 #include "riot.hpp"
 #include "day.hpp"
 #include "zombie.hpp"
+#include "player.hpp"
 
 Riot			g_Riot;
+Player			*g_Players[RIOT_MAX_PLAYERS];
+IVEngineServer		*engine = NULL;
+IServerGameEnts		*gameents = NULL;
 IServerGameDLL		*server = NULL;
 IPlayerInfoManager	*playerinfomanager = NULL;
+IServerGameClients	*gameclients = NULL;
 IBaseFileSystem		*basefilesystem = NULL;
 ICvar			*icvar = NULL;
 
 PLUGIN_EXPOSE(Riot, g_Riot);
+
+SH_DECL_HOOK2_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, edict_t *, char const *);
+SH_DECL_HOOK1_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, edict_t *);
 
 static void		LoadDays(KeyValues * const root)
 {
@@ -75,8 +83,11 @@ bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool l
 	days_root = new KeyValues("Days");
 	zombies_root = new KeyValues("Zombies");
 	PLUGIN_SAVEVARS();
+	GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
+	GET_V_IFACE_CURRENT(GetServerFactory, gameents, IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
 	GET_V_IFACE_CURRENT(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_CURRENT(GetServerFactory, playerinfomanager, IPlayerInfoManager, INTERFACEVERSION_PLAYERINFOMANAGER);
+	GET_V_IFACE_CURRENT(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 	GET_V_IFACE_CURRENT(GetFileSystemFactory, basefilesystem, IBaseFileSystem, BASEFILESYSTEM_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
 	ismm->PathFormat(days_path, (MAX_PATH + 1), "%s/%s/%s", ismm->GetBaseDir(), RIOT_CONFIG_PATH, "days.cfg");
@@ -101,6 +112,8 @@ bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool l
 		LoadZombies((KeyValues * const)zombies_root);
 		zombies_root->deleteThis();
 	}
+	SH_ADD_HOOK(IServerGameClients, ClientPutInServer, gameclients, SH_MEMBER(this, &Riot::Hook_ClientPutInServer), true);
+	SH_ADD_HOOK(IServerGameClients, ClientDisconnect, gameclients, SH_MEMBER(this, &Riot::Hook_ClientDisconnect), true);
 	return (ret);
 }
 
@@ -161,4 +174,32 @@ const char		*Riot::GetDate()
 const char		*Riot::GetLogTag()
 {
 	return (RIOT_TAG);
+}
+
+void			Riot::Hook_ClientPutInServer(edict_t *pEntity,
+			char const *playername)
+{
+	Player		*player;
+
+	player = new Player(pEntity);
+	g_Players[player->GetIndex() - 1] = player;
+}
+
+void			Riot::Hook_ClientDisconnect(edict_t *pEntity)
+{
+	unsigned int	idx;
+	int		index;
+	Player		*player;
+
+	idx = ~0;
+	index = engine->IndexOfEdict(pEntity);
+	player = NULL;
+	while (++idx < RIOT_MAX_PLAYERS && NULL == player)
+	{
+		if (g_Players[idx] && index == g_Players[idx]->GetIndex())
+		{
+			delete g_Players[idx];
+			g_Players[idx] = NULL;
+		}
+	}
 }

@@ -10,8 +10,10 @@
 # define RIOT_TAG "RIOT"
 # define RIOT_PATH "addons/riot"
 # define RIOT_CONFIG_PATH RIOT_PATH ## "/configs"
+# define RIOT_MAX_PLAYERS 65
 
 # include <ISmmPlugin.h>
+# include <sourcehook.h>
 # include <stdio.h>
 
 # ifdef WIN32
@@ -23,6 +25,8 @@
 # endif
 
 # ifdef SOURCE_ENGINE
+#   include <eiface.h>
+#   include <edict.h>
 #   include <filesystem.h>
 #   include <KeyValues.h>
 #   include <iplayerinfo.h>
@@ -45,11 +49,17 @@ class Riot : public ISmmPlugin
 		const char	*GetVersion();
 		const char	*GetDate();
 		const char	*GetLogTag();
+		void		Hook_ClientPutInServer(edict_t *pEntity,
+				char const *playername);
+		void		Hook_ClientDisconnect(edict_t *pEntity);
 };
 
 extern Riot			g_Riot;
+extern IVEngineServer		*engine;
+extern IServerGameEnts		*gameents;
 extern IServerGameDLL		*server;
 extern IPlayerInfoManager	*playerinfomanager;
+extern IServerGameClients	*gameclients;
 extern IBaseFileSystem		*basefilesystem;
 extern ICvar			*icvar;
 

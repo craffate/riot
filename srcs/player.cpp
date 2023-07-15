@@ -1,36 +1,39 @@
 #include "player.hpp"
 
-Player::Player(void) : _edict(NULL), _info(NULL)
+Player::Player(void) : _pEntity(NULL), _index(NULL), _info(NULL)
 {
 }
 
-Player::Player(edict_t *edict) : _edict(edict)
+Player::Player(edict_t *pEntity) : _pEntity(pEntity)
 {
-	this->_info = playerinfomanager->GetPlayerInfo(edict);
+	this->_index = engine->IndexOfEdict(pEntity);
+	this->_info = playerinfomanager->GetPlayerInfo(pEntity);
 }
 
 Player::Player(Player const &ref)
 {
-	this->_edict = ref._edict;
+	this->_pEntity = ref._pEntity;
+	this->_index = ref._index;
 	this->_info = ref._info;
 }
 
 Player::~Player()
 {
-	this->_edict = NULL;
+	this->_pEntity = NULL;
+	this->_index = -1;
 	this->_info = NULL;
 }
 
-edict_t		*Player::GetEdict(void) const
+edict_t		*Player::GetPEntity(void) const
 {
-	return (this->_edict);
+	return (this->_pEntity);
 }
 
-void		Player::SetEdict(edict_t *edict)
+int		Player::GetIndex(void) const
 {
-	this->_edict = edict;
-	this->_info = playerinfomanager->GetPlayerInfo(edict);
+	return (this->_index);
 }
+
 
 IPlayerInfo	*Player::GetPlayerInfo(void) const
 {
