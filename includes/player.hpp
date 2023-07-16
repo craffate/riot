@@ -9,6 +9,7 @@ class Player
 {
 	private:
 		edict_t		*_pEntity;
+		CBaseEntity	*_base_entity;
 		int		_index;
 		IPlayerInfo	*_info;
 	public:
