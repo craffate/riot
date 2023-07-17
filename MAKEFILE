@@ -41,7 +41,7 @@ $(HL2SDK)\public\vstdlib\
 
 LIBS = tier0.lib tier1.lib vstdlib.lib legacy_stdio_definitions.lib
 
-SRCS_FILES = \riot.x \day.x \zombie.x \cvar.x \player.x
+SRCS_FILES = \riot.x \day.x \zombie.x \cvar.x \player.x \bot.x
 
 SINGLESPACE=$(subst ',,' ')
 

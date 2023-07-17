@@ -2,19 +2,22 @@
 #include "day.hpp"
 #include "zombie.hpp"
 #include "player.hpp"
+#include "bot.hpp"
 
 Riot			g_Riot;
-Player			*g_Players[RIOT_MAX_PLAYERS];
+Player			*g_Players[PLAYER_MAX_PLAYERS];
 IVEngineServer		*engine = NULL;
 IServerGameEnts		*gameents = NULL;
 IServerGameDLL		*server = NULL;
 IPlayerInfoManager	*playerinfomanager = NULL;
 IServerGameClients	*gameclients = NULL;
+IBotManager		*botmanager = NULL;
 IBaseFileSystem		*basefilesystem = NULL;
 ICvar			*icvar = NULL;
 
 PLUGIN_EXPOSE(Riot, g_Riot);
 
+SH_DECL_HOOK6(IServerGameDLL, LevelInit, SH_NOATTRIB, 0, bool, char const *, char const *, char const *, char const *, bool, bool);
 SH_DECL_HOOK2_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, edict_t *, char const *);
 SH_DECL_HOOK1_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, edict_t *);
 
@@ -56,7 +59,6 @@ static void		LoadZombies(KeyValues * const root)
 	zombies = root->GetFirstTrueSubKey();
 	while (++idx < ZOMBIE_MAX && NULL != zombies)
 	{
-		curr = g_Zombies[idx];
 		curr = new Zombie((char * const)zombies->GetName());
 		curr->SetType((const t_zombie_type)zombies->GetInt("type"));
 		curr->SetModel((char * const)zombies->GetString("model"));
@@ -67,6 +69,7 @@ static void		LoadZombies(KeyValues * const root)
 		curr->SetFov((unsigned short)zombies->GetInt("fov"));
 		curr->SetZvision((char * const)zombies->GetString("zvision"));
 		zombies = zombies->GetNextTrueSubKey();
+		g_Zombies[idx] = curr;
 	}
 	zombies = NULL;
 }
@@ -88,6 +91,7 @@ bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool l
 	GET_V_IFACE_CURRENT(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_CURRENT(GetServerFactory, playerinfomanager, IPlayerInfoManager, INTERFACEVERSION_PLAYERINFOMANAGER);
 	GET_V_IFACE_CURRENT(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
+	GET_V_IFACE_CURRENT(GetServerFactory, botmanager, IBotManager, INTERFACEVERSION_PLAYERBOTMANAGER);
 	GET_V_IFACE_CURRENT(GetFileSystemFactory, basefilesystem, IBaseFileSystem, BASEFILESYSTEM_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
 	ismm->PathFormat(days_path, (MAX_PATH + 1), "%s/%s/%s", ismm->GetBaseDir(), RIOT_CONFIG_PATH, "days.cfg");
@@ -112,6 +116,7 @@ bool			Riot::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool l
 		LoadZombies((KeyValues * const)zombies_root);
 		zombies_root->deleteThis();
 	}
+	SH_ADD_HOOK(IServerGameDLL, LevelInit, server, SH_MEMBER(this, &Riot::Hook_LevelInit), true);
 	SH_ADD_HOOK(IServerGameClients, ClientPutInServer, gameclients, SH_MEMBER(this, &Riot::Hook_ClientPutInServer), true);
 	SH_ADD_HOOK(IServerGameClients, ClientDisconnect, gameclients, SH_MEMBER(this, &Riot::Hook_ClientDisconnect), true);
 	return (ret);
@@ -179,27 +184,25 @@ const char		*Riot::GetLogTag()
 void			Riot::Hook_ClientPutInServer(edict_t *pEntity,
 			char const *playername)
 {
-	Player		*player;
-
-	player = new Player(pEntity);
-	g_Players[player->GetIndex() - 1] = player;
+	CreatePlayer(pEntity);
 }
 
 void			Riot::Hook_ClientDisconnect(edict_t *pEntity)
 {
+	DeletePlayer(FindPlayer(pEntity));
+}
+
+bool			Riot::Hook_LevelInit(const char *pMapName,
+			char const *pMapEntities, char const *pOldLevel,
+			char const *pLandmarkName, bool loadGame,
+			bool background)
+{
 	unsigned int	idx;
-	int		index;
-	Player		*player;
 
 	idx = ~0;
-	index = engine->IndexOfEdict(pEntity);
-	player = NULL;
-	while (++idx < RIOT_MAX_PLAYERS && NULL == player)
+	while (BOT_MAX > ++idx)
 	{
-		if (g_Players[idx] && index == g_Players[idx]->GetIndex())
-		{
-			delete g_Players[idx];
-			g_Players[idx] = NULL;
-		}
+		CreateBot(g_Zombies[0]);
 	}
+	return true;
 }

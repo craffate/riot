@@ -10,7 +10,6 @@
 # define RIOT_TAG "RIOT"
 # define RIOT_PATH "addons/riot"
 # define RIOT_CONFIG_PATH RIOT_PATH ## "/configs"
-# define RIOT_MAX_PLAYERS 65
 
 # include <ISmmPlugin.h>
 # include <sourcehook.h>
@@ -49,6 +48,10 @@ class Riot : public ISmmPlugin
 		const char	*GetVersion();
 		const char	*GetDate();
 		const char	*GetLogTag();
+		bool		Riot::Hook_LevelInit(const char *pMapName,
+				char const *pMapEntities, char const *pOldLevel,
+				char const *pLandmarkName, bool loadGame,
+				bool background);
 		void		Hook_ClientPutInServer(edict_t *pEntity,
 				char const *playername);
 		void		Hook_ClientDisconnect(edict_t *pEntity);
@@ -60,6 +63,7 @@ extern IServerGameEnts		*gameents;
 extern IServerGameDLL		*server;
 extern IPlayerInfoManager	*playerinfomanager;
 extern IServerGameClients	*gameclients;
+extern IBotManager		*botmanager;
 extern IBaseFileSystem		*basefilesystem;
 extern ICvar			*icvar;
 
