@@ -21,7 +21,7 @@ class Player
 		Player(Player const &ref);
 		~Player();
 
-		Player		&operator=(Player const &ref);
+		Player		&operator=(const Player &ref);
 		edict_t		*GetPEntity(void) const;
 		int		GetIndex(void) const;
 		IPlayerInfo	*GetPlayerInfo(void) const;
