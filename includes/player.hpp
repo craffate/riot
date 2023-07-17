@@ -4,6 +4,7 @@
 # include <eiface.h>
 # include <edict.h>
 # include <iplayerinfo.h>
+# include "zombie.hpp"
 
 class Player
 {
@@ -12,9 +13,11 @@ class Player
 		CBaseEntity	*_base_entity;
 		int		_index;
 		IPlayerInfo	*_info;
+		const Zombie	*_zombie;
 	public:
 		Player(void);
 		Player(edict_t *pEntity);
+		Player(edict_t *pEntity, const Zombie *zombie);
 		Player(Player const &ref);
 		~Player();
 
@@ -22,6 +25,8 @@ class Player
 		edict_t		*GetPEntity(void) const;
 		int		GetIndex(void) const;
 		IPlayerInfo	*GetPlayerInfo(void) const;
+		void		SetZombie(const Zombie *zombie);
+		const Zombie	*GetZombie(void) const;
 };
 
 extern IVEngineServer		*engine;
