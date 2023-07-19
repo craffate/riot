@@ -5,6 +5,7 @@ LINKER = LINK.EXE
 CFLAGS = /W3 /WX /WL /O2 /TP /MT /c\
 /D SOURCEMM_EXPORTS /D _USRDLL /D _MBCS\
 /D _CRT_SECURE_NO_DEPRECATE /D _CRT_SECURE_NO_WARNINGS /D _CRT_NONSTDC_NO_DEPRECATE\
+/D COMPILER_MSVC /D COMPILER_MSVC32\
 /D SOURCE_ENGINE=19\
 /D WIN32 /D _WINDOWS
 LFLAGS = /DLL\
@@ -36,6 +37,8 @@ $(HL2SDK)\public\tier0\
 $(HL2SDK)\public\tier1\
 $(HL2SDK)\public\mathlib\
 $(HL2SDK)\public\vstdlib\
+$(HL2SDK)\game\client\
+$(HL2SDK)\game\server\
 $(HL2SDK)\game\shared\
 $(HL2SDK)\common\
 
