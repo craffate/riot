@@ -27,8 +27,7 @@ OBJS_PATH = objs
 INCLUDES_PATH = includes
 BUILD_PATH = build
 
-INCLUDES = $(INCLUDES_PATH)\
-$(MMSOURCE18)\core\
+ADDITIONAL_INCLUDES = $(MMSOURCE18)\core\
 $(MMSOURCE18)\core\sourcehook\
 $(HL2SDK)\public\
 $(HL2SDK)\public\dlls\
@@ -53,9 +52,9 @@ OBJS = $(subst \,$(OBJS_PATH)\,$(SRCS_FILES))
 OBJS = $(subst .x,.obj,$(OBJS))
 SRCS = $(subst \,$(SRCS_PATH)\,$(SRCS_FILES))
 SRCS = $(subst .x,.cpp,$(SRCS))
-INCLUDES = $(subst $(SINGLESPACE),;,$(INCLUDES))
+ADDITIONAL_INCLUDES = $(subst $(SINGLESPACE), /I,$(ADDITIONAL_INCLUDES))
 
-INCLUDE = $(INCLUDES);$(INCLUDE)
+INCLUDE = $(INCLUDES_PATH);$(INCLUDE)
 
 all: $(SRCS) $(OBJS_PATH) $(BUILD_PATH) $(NAME)
 
@@ -66,7 +65,7 @@ $(BUILD_PATH):
 	MD build
 
 $(OBJS): $(SRCS)
-	$(CC) /Fo$(OBJS_PATH)\ $(CFLAGS) $(SRCS)
+	$(CC) /Fo$(OBJS_PATH)\ $(CFLAGS) /I$(ADDITIONAL_INCLUDES) $(SRCS)
 
 $(NAME): $(OBJS)
 	$(LINKER) /OUT:$(BUILD_PATH)\$(NAME) $(LFLAGS) $(OBJS) $(LIBS)
